@@ -1,0 +1,3 @@
+request 获取method 装饰器通过 request.method获取不到 只能通过request.META.get('REQUEST_METHOD')
+adminmodel [prepopulated_fields]实现联动
+django.db.models.ImageField(upload_to='上传到的[文件夹a]') setting.Media_root+文件夹a

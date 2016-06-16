@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Rango</title>
+</head>
+<body>
+    <h1>page添加</h1>
+    <form method="post" action={% url 'add_page' category%}>
+        {% csrf_token %}
+        {{ form }}
+        <input name="submit" type="submit" value="添加" />
+    </form>
+
+</body>
+</html>
