@@ -1,16 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Rango</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% block body_block %}
+
+
     <h1>page添加</h1>
-    <form method="post" action={% url 'add_page' category%}>
+    <form method="post" action={% url 'add_page' category_name%}>
         {% csrf_token %}
-        {{ form }}
+        {{ form.as_p }}
         <input name="submit" type="submit" value="添加" />
     </form>
 
-</body>
-</html>
+{% endblock %}

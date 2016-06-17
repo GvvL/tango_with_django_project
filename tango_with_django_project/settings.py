@@ -47,7 +47,8 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rango'
+    'rango',
+    'registration'
 )
 
 
@@ -110,3 +111,15 @@ STATICFILES_DIRS = (
 MEDIA_URL = '/media/'#访问路径
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media') # Absolute path to the media directory
+
+SESSION_ENGINE='django.contrib.sessions.backends.cached_db'#session存储方式 这个是默认 cached更快
+SESSION_EXPIRE_AT_BROWSER_CLOSE=False#浏览器关闭时是否关闭
+SESSION_COOKIE_AGE=1209600#session过期时常
+
+#-------------DRR配置-------------------------
+REGISTRATION_OPEN = True                # If True, users can register
+ACCOUNT_ACTIVATION_DAYS = 7     # One-week activation window; you may, of course, use a different value.
+REGISTRATION_AUTO_LOGIN = True  # If True, the user will be automatically logged in.
+LOGIN_REDIRECT_URL = '/rango/'  # The page you want users to arrive at after they successful log in
+LOGIN_URL = '/accounts/login/'  # The page users are directed to if they are not logged in,
+                                                                # and are trying to access pages requiring authentication

@@ -2,7 +2,8 @@
 from django.shortcuts import render
 from django.http import HttpResponse,HttpResponseRedirect,HttpRequest
 from models import Category,Page
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login,logout
+from datetime import datetime
 #登录权限检查器
 import functools
 #onlyfilterpost 是否只过滤post
@@ -23,12 +24,52 @@ def login_require(onlyfilterpost=False):
         return __wrap
     return _wrap
 def index(request):
+    request.session.set_test_cookie()
     category_list=Category.objects.order_by('-likes')[:5]
-    context_dict = {'categories': category_list}
-    return render(request,'rango/index.html',context_dict)
+    pages=Page.objects.order_by('-views')[:5]
+    context_dict = {'categories': category_list,'pages':pages}
+
+        # Get the number of visits to the site.
+    # We use the COOKIES.get() function to obtain the visits cookie.
+    # If the cookie exists, the value returned is casted to an integer.
+    # If the cookie doesn't exist, we default to zero and cast that.
+    visits = request.session.get('visits')
+
+    reset_last_visit_time = False
+    if not visits:
+        request.session['visits']=0
+        visits=0
+
+    # Does the cookie last_visit exist?
+    last_visit = request.session.get('last_visit')
+    if last_visit:
+        # Cast the value to a Python date/time object.
+        last_visit_time = datetime.strptime(last_visit[:-7], "%Y-%m-%d %H:%M:%S")
+
+        # If it's been more than a day since the last visit...
+        if (datetime.now() - last_visit_time).seconds  > 1:
+            visits = visits + 1
+            # ...and flag that the cookie last visit needs to be updated
+            reset_last_visit_time = True
+    else:
+        # Cookie last_visit doesn't exist, so flag that it should be set.
+        reset_last_visit_time = True
+
+
+    if reset_last_visit_time:
+        request.session['last_visit'] = str(datetime.now())
+        request.session['visits'] = visits
+    context_dict['visits'] = visits
+    response = render(request, 'rango/index.html', context_dict)
+    return response
 
 def about(request):
-    return HttpResponse('here is about page')
+    if request.session.has_key('visits'):
+        count=request.session.get('visits')
+    else:
+        count=0
+    context_dict={'visits':count}
+    return render(request,'rango/about.html',context_dict)
 
 
 def category(request,category_name_slug):
@@ -44,7 +85,7 @@ def category(request,category_name_slug):
         pass
     return render(request,'rango/category.html',context_dict)
 from form import CategoryForm,PageForm,UserForm,UserProfileForm
-@login_require()
+@login_require(True)
 def add_category(request):
     if request.method=='POST':
         form=CategoryForm(request.POST)
@@ -81,7 +122,7 @@ def add_page(request, category_name_slug):
     else:
         form = PageForm()
 
-    context_dict = {'form':form, 'category': cat}
+    context_dict = {'form':form, 'category': cat,'category_name':category_name_slug}
 
     return render(request, 'rango/add_page.html', context_dict)
 
@@ -90,6 +131,10 @@ def register(request):
     # A boolean value for telling the template whether the registration was successful.
     # Set to False initially. Code changes value to True when registration succeeds.
     registered = False
+
+    if request.session.test_cookie_worked():
+        print ">>>> TEST COOKIE WORKED!"
+        request.session.delete_test_cookie()
 
     # If it's a HTTP POST, we're interested in processing form data.
     if request.method == 'POST':
@@ -182,3 +227,11 @@ def user_login(request):
         # No context variables to pass to the template system, hence the
         # blank dictionary object...
         return render(request, 'rango/login.html', {})
+
+@login_require()
+def user_logout(request):
+    # Since we know the user is logged in, we can now just log them out.
+    logout(request)
+
+    # Take the user back to the homepage.
+    return HttpResponseRedirect('/rango/')

@@ -1,3 +1,11 @@
 request 获取method 装饰器通过 request.method获取不到 只能通过request.META.get('REQUEST_METHOD')
 adminmodel [prepopulated_fields]实现联动
 django.db.models.ImageField(upload_to='上传到的[文件夹a]') setting.Media_root+文件夹a
+
+如何定义一个模板标签{% mytag %}
+1、定义标签的html模板，路径任意【htmlpath】
+2、在相应需要使用该标签的目录下新建一个templatetags目录，里面新建一个__init__.py空文件。这样便可以使用{%load 标签文件名%}加载到里面的标签
+3、在templatetags里新建一个tags.py,所有定义的标签都可以放在里面.使用时先{% load tags %}
+4、在tags.py必须先实例化一个register属性名,其值为django.template.Library()实例
+5、所有的标签名都对应一个经过@register.inclusion_tag('【htmlpath】')修饰过的方法名.
+6、使用时先进性load操作，更改后重启服务器
